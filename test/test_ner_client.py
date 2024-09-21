@@ -39,3 +39,42 @@ class TestNerClient(unittest.TestCase):
         ents = ner.get_ents('...')
         expected_result = {'ents': [{'ent': 'Lithuanian', 'label': 'Group'}], 'html':''}
         self.assertListEqual(ents['ents'], expected_result['ents'])
+    
+    def test_get_ents_given_spacy_LOC_is_returned_serializes_to_Location(self):
+        model = NerModelTestDouble('eng')
+        doc_ents = [{'text':'Munich', 'label_':'LOC'}]
+        model.returns_doc_ents(doc_ents)
+        ner = NamedEntityClient(model)
+        ents = ner.get_ents('...')
+        expected_result = {'ents': [{'ent': 'Munich', 'label': 'Location'}], 'html':''}
+        self.assertListEqual(ents['ents'], expected_result['ents'])
+
+    def test_get_ents_given_spacy_LANGUAGE_is_returned_serializes_to_Language(self):
+        model = NerModelTestDouble('eng')
+        doc_ents = [{'text':'German', 'label_':'LANGUAGE'}]
+        model.returns_doc_ents(doc_ents)
+        ner = NamedEntityClient(model)
+        ents = ner.get_ents('...')
+        expected_result = {'ents': [{'ent': 'German', 'label': 'Language'}], 'html':''}
+        self.assertListEqual(ents['ents'], expected_result['ents'])
+
+    def test_get_ents_given_spacy_GPE_is_returned_serializes_to_Location(self):
+        model = NerModelTestDouble('eng')
+        doc_ents = [{'text':'EU', 'label_':'GPE'}]
+        model.returns_doc_ents(doc_ents)
+        ner = NamedEntityClient(model)
+        ents = ner.get_ents('...')
+        expected_result = {'ents': [{'ent': 'EU', 'label': 'Location'}], 'html':''}
+        self.assertListEqual(ents['ents'], expected_result['ents'])
+
+    def test_get_ents_given_multiple_ents_serializes_all(self):
+        model = NerModelTestDouble('eng')
+        doc_ents = [{'text':'EU', 'label_':'GPE'}, {'text': 'Judith Polgar', 'label_': 'PERSON'}]
+        model.returns_doc_ents(doc_ents)
+        ner = NamedEntityClient(model)
+        ents = ner.get_ents('...')
+        expected_result = {'ents': [
+            {'ent': 'EU', 'label': 'Location'}, 
+            {'ent': 'Judith Polgar', 'label': 'Person'}
+            ], 'html':''}
+        self.assertListEqual(ents['ents'], expected_result['ents'])
